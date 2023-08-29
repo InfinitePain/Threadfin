@@ -61,6 +61,28 @@ RUN apk add curl
 RUN apk add ffmpeg
 RUN apk add vlc
 
+# Packages for Streamkink
+RUN apk add python3 
+RUN apk add libxml2-dev 
+RUN apk add libxslt-dev
+RUN python3 -m ensurepip --upgrade
+RUN python3 -m pip install --upgrade pip 
+RUN python3 -m pip install --upgrade setuptools 
+RUN python3 -m pip install --upgrade wheel
+RUN python3 -m pip install --upgrade versioningit
+RUN python3 -m pip install --upgrade certifi
+RUN python3 -m pip install --upgrade isodate 
+RUN python3 -m pip install --upgrade pycountry 
+RUN python3 -m pip install --upgrade pycryptodome 
+RUN python3 -m pip install --upgrade pysocks 
+RUN python3 -m pip install --upgrade requests 
+RUN python3 -m pip install --upgrade trio 
+RUN python3 -m pip install --upgrade trio-websocket 
+RUN python3 -m pip install --upgrade typing_extensions 
+RUN python3 -m pip install --upgrade urllib3 
+RUN python3 -m pip install --upgrade websocket-client
+RUN python3 -m pip install --upgrade streamlink
+
 RUN apk update && apk add --no-cache tzdata
 ENV TZ=America/New_York
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
