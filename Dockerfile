@@ -1,9 +1,9 @@
 # First stage. Building a binary
 # -----------------------------------------------------------------------------
-FROM golang:1.18-alpine AS builder
+FROM golang:1.18 AS builder
 
 # Download the source code
-RUN apk add --no-cache git
+RUN apt-get update && apt-get install -y git
 RUN git clone https://github.com/Threadfin/Threadfin.git /src
 
 WORKDIR /src
@@ -15,9 +15,8 @@ RUN go build threadfin.go
 
 # Second stage. Creating an image
 # -----------------------------------------------------------------------------
-
-# Base image is a latest stable debian
-FROM alpine:latest
+ARG USE_NVIDIA=0
+FROM ${USE_NVIDIA:+nvidia/cuda:12.1.1-base-ubuntu22.04}${USE_NVIDIA:-ubuntu:22.04}
 
 ARG BUILD_DATE
 ARG VCS_REF
@@ -54,17 +53,13 @@ ENV PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$THREADFIN
 # Set working directory
 WORKDIR $THREADFIN_HOME
 
-RUN apk update
-RUN apk upgrade
-RUN apk add --no-cache ca-certificates
-RUN apk add curl
-RUN apk add ffmpeg
-RUN apk add vlc
+RUN apt-get update && apt-get upgrade -y
+RUN apt-get install -y ca-certificates curl ffmpeg vlc
 
 # Packages for Streamkink
-RUN apk add python3 
-RUN apk add libxml2-dev 
-RUN apk add libxslt-dev
+RUN apt add python3 
+RUN apt add libxml2-dev 
+RUN apt add libxslt-dev
 RUN python3 -m ensurepip --upgrade
 RUN python3 -m pip install --upgrade pip 
 RUN python3 -m pip install --upgrade setuptools 
@@ -83,11 +78,9 @@ RUN python3 -m pip install --upgrade urllib3
 RUN python3 -m pip install --upgrade websocket-client
 RUN python3 -m pip install --upgrade streamlink
 
-RUN apk update && apk add --no-cache tzdata
-ENV TZ=America/New_York
-RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+RUN DEBIAN_FRONTEND=noninteractive TZ="America/New_York" apt-get -y install tzdata
 
-RUN mkdir $THREADFIN_BIN
+RUN mkdir -p $THREADFIN_BIN
 
 # Copy built binary from builder image
 COPY --chown=${THREADFIN_UID} --from=builder [ "/src/threadfin", "${THREADFIN_BIN}/" ]
@@ -101,9 +94,9 @@ RUN mkdir $THREADFIN_CONF
 RUN chmod a+rwX $THREADFIN_CONF
 RUN mkdir $THREADFIN_TEMP
 RUN chmod a+rwX $THREADFIN_TEMP
-RUN sed -i 's/geteuid/getppid/' /usr/bin/vlc
 
-RUN mkdir /lib64 && ln -s /lib/libc.musl-x86_64.so.1 /lib64/ld-linux-x86-64.so.2
+# For VLC
+RUN sed -i 's/geteuid/getppid/' /usr/bin/vlc
 
 # Configure container volume mappings
 VOLUME $THREADFIN_CONF
