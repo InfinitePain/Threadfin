@@ -57,26 +57,11 @@ RUN apt-get update && apt-get upgrade -y
 RUN apt-get install -y ca-certificates curl ffmpeg vlc
 
 # Packages for Streamkink
-RUN apt add python3 
-RUN apt add libxml2-dev 
-RUN apt add libxslt-dev
-RUN python3 -m ensurepip --upgrade
-RUN python3 -m pip install --upgrade pip 
-RUN python3 -m pip install --upgrade setuptools 
-RUN python3 -m pip install --upgrade wheel
-RUN python3 -m pip install --upgrade versioningit
-RUN python3 -m pip install --upgrade certifi
-RUN python3 -m pip install --upgrade isodate 
-RUN python3 -m pip install --upgrade pycountry 
-RUN python3 -m pip install --upgrade pycryptodome 
-RUN python3 -m pip install --upgrade pysocks 
-RUN python3 -m pip install --upgrade requests 
-RUN python3 -m pip install --upgrade trio 
-RUN python3 -m pip install --upgrade trio-websocket 
-RUN python3 -m pip install --upgrade typing_extensions 
-RUN python3 -m pip install --upgrade urllib3 
-RUN python3 -m pip install --upgrade websocket-client
-RUN python3 -m pip install --upgrade streamlink
+RUN apt install -y python3 \
+                   libxml2-dev \
+                   libxslt-dev \
+                   python3-pip \
+                   streamlink
 
 RUN DEBIAN_FRONTEND=noninteractive TZ="America/New_York" apt-get -y install tzdata
 
